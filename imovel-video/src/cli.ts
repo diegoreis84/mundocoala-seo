@@ -4,7 +4,8 @@ import { parseArgs } from "node:util";
 import { kitMarkdown } from "./hooks/kit.js";
 import { createStoryboards, type Modo } from "./pipeline.js";
 import { renderStoryboard, type Formato } from "./render.js";
-import { BrandSchema, StoryboardSchema, type Storyboard } from "./types.js";
+import { z } from "zod";
+import { BrandSchema, HookPackSchema, ListingSchema, PhotoAnalysisSchema, StoryboardSchema, type Storyboard } from "./types.js";
 
 const HELP = `
 Uso:
@@ -22,6 +23,9 @@ Opções:
   --trilha <arquivo>     Música (arquivo dentro da pasta de fotos)
   --so-roteiro           Só gera roteiros e kit para revisão, sem renderizar
   --sem-ia               Força o modo sem IA (heurísticas e modelos de gancho)
+  --dados <json>         Dados do anúncio já extraídos/revisados (pula a IA nessa etapa)
+  --analise <json>       Avaliação das fotos já feita/revisada
+  --ganchos <json>       Kit de ganchos já feito/revisado
 `;
 
 function printStoryboard(sb: Storyboard) {
@@ -45,6 +49,9 @@ async function main() {
       roteiro: { type: "string" },
       "so-roteiro": { type: "boolean", default: false },
       "sem-ia": { type: "boolean", default: false },
+      dados: { type: "string" },
+      analise: { type: "string" },
+      ganchos: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -72,6 +79,11 @@ async function main() {
       modos: values.modos.split(",").map((m) => m.trim()) as Modo[],
       maxCenas: Number(values["max-cenas"]),
       usarIA: values["sem-ia"] ? false : undefined,
+      prontos: {
+        dados: values.dados ? ListingSchema.parse(JSON.parse(await fs.readFile(values.dados, "utf8"))) : undefined,
+        analise: values.analise ? z.array(PhotoAnalysisSchema).parse(JSON.parse(await fs.readFile(values.analise, "utf8"))) : undefined,
+        ganchos: values.ganchos ? HookPackSchema.parse(JSON.parse(await fs.readFile(values.ganchos, "utf8"))) : undefined,
+      },
       log: console.log,
     });
     storyboards = result.storyboards;

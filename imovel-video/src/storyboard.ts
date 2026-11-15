@@ -100,20 +100,14 @@ function caption(room: Room, l: Listing, used: Set<string>): { titulo: string; s
       if (l.vagas) subtitulo = plural(l.vagas, "vaga", "vagas");
       break;
   }
-  if (!subtitulo) {
-    const dif = l.diferenciais.find((d) => !used.has(d));
-    if (dif) {
-      used.add(dif);
-      subtitulo = dif;
-    }
-  }
-  return { titulo, subtitulo };
+  // Sem dado específico do ambiente, fica sem subtítulo (nunca mistura diferencial de outro ambiente).
+  return { titulo, subtitulo: subtitulo && !redundant(titulo, subtitulo) ? subtitulo : undefined };
 }
 
 export function highlights(l: Listing): string[] {
   const h: string[] = [];
   if (l.area_m2) h.push(fmtArea(l.area_m2));
-  if (l.quartos) h.push(plural(l.quartos, "quarto", "quartos"));
+  if (l.quartos && l.quartos !== l.suites) h.push(plural(l.quartos, "quarto", "quartos"));
   if (l.suites) h.push(plural(l.suites, "suíte", "suítes"));
   if (l.vagas) h.push(plural(l.vagas, "vaga", "vagas"));
   return h.slice(0, 4);
@@ -155,6 +149,14 @@ export function selectPhotos(photos: ScoredPhoto[], maxCenas = 8, notaMinima = 3
   const [first, ...rest] = chosen;
   const ordered = first ? [first, ...rest.sort((a, b) => tourOrder(a.ambiente) - tourOrder(b.ambiente))] : [];
   return { ordered, pool, best, descartadas };
+}
+
+const fold = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+/** Subtítulo que só repete o título ("Três suítes amplas" / "3 suítes"). */
+function redundant(titulo: string, subtitulo: string) {
+  if (fold(titulo) === fold(subtitulo)) return true;
+  const noun = fold(subtitulo).split(/\s+/).pop() ?? "";
+  return noun.length > 3 && fold(titulo).includes(noun);
 }
 
 const numbers = (s: string) => s.match(/\d[\d.,]*/g)?.join("|") ?? "";
@@ -244,17 +246,17 @@ export function buildHookStoryboard(opts: {
   apresentacao.forEach((p, i) => {
     const cap = caption(p.ambiente, listing, used);
     const beneficio = benefitFor(p.ambiente);
+    // Benefício no título; o dado concreto (m², nº de suítes...) no subtítulo.
+    const dado = caption(p.ambiente, { ...listing, frases_por_ambiente: [] }, new Set()).subtitulo;
+    const titulo = beneficio ?? cap.titulo;
+    const sub = beneficio
+      ? dado && !sameNumbers(titulo, dado) && !redundant(titulo, dado) ? dado : undefined
+      : cap.subtitulo;
     cenas.push({
       foto: base(p),
       ambiente: p.ambiente,
-      titulo: beneficio ?? cap.titulo,
-      subtitulo: beneficio
-        ? cap.titulo !== ROOM_LABEL[p.ambiente]
-          ? cap.titulo
-          : cap.subtitulo && !sameNumbers(beneficio, cap.subtitulo)
-            ? cap.subtitulo
-            : undefined
-        : cap.subtitulo,
+      titulo,
+      subtitulo: sub,
       movimento: MOTIONS[(i + 1) % MOTIONS.length],
       duracao_s: 2.4,
       fase: "apresentacao",
@@ -271,12 +273,14 @@ export function buildHookStoryboard(opts: {
     });
   }
   if (desire2) {
-    const cap = caption(desire2.ambiente, listing, used);
+    // Fecha o desejo com o resumo do imóvel antes da chamada para ação.
+    const resumo = highlights(listing).join(" · ");
+    const beneficio = benefitFor(desire2.ambiente);
     cenas.push({
       foto: base(desire2),
       ambiente: desire2.ambiente,
-      titulo: benefitFor(desire2.ambiente) ?? cap.titulo,
-      subtitulo: cap.subtitulo,
+      titulo: beneficio ?? (resumo || caption(desire2.ambiente, listing, used).titulo),
+      subtitulo: beneficio && resumo ? resumo : undefined,
       movimento: "pan_direita",
       duracao_s: 3.5,
       fase: "desejo",

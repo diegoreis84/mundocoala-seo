@@ -1,0 +1,18 @@
+[
+  { "arquivo": "foto-01.jpg", "ambiente": "fachada", "nota_estetica": 5, "problemas": ["foto pequena", "enquadramento estreito"], "descricao": "Fachada e portaria do Condomínio Romania" },
+  { "arquivo": "foto-02.jpg", "ambiente": "cozinha", "nota_estetica": 8, "problemas": [], "descricao": "Cozinha com coifa integrada à sala" },
+  { "arquivo": "foto-03.jpg", "ambiente": "sala", "nota_estetica": 9, "problemas": [], "descricao": "Sala de estar integrada à sacada com vista" },
+  { "arquivo": "foto-04.jpg", "ambiente": "sala", "nota_estetica": 7, "problemas": [], "descricao": "Sala de TV com sofá e quadros" },
+  { "arquivo": "foto-05.jpg", "ambiente": "lazer", "nota_estetica": 4, "problemas": ["foto pequena", "brinquedos espalhados"], "descricao": "Brinquedoteca do condomínio" },
+  { "arquivo": "foto-06.jpg", "ambiente": "varanda", "nota_estetica": 9, "problemas": [], "descricao": "Sacada envidraçada com mesa e vista da cidade" },
+  { "arquivo": "foto-07.jpg", "ambiente": "escritorio", "nota_estetica": 7, "problemas": [], "descricao": "Quarto usado como escritório, com vista" },
+  { "arquivo": "foto-08.jpg", "ambiente": "sala", "nota_estetica": 8, "problemas": [], "descricao": "Sala de jantar e estar amplas" },
+  { "arquivo": "foto-09.jpg", "ambiente": "lazer", "nota_estetica": 6, "problemas": [], "descricao": "Academia do condomínio" },
+  { "arquivo": "foto-10.jpg", "ambiente": "banheiro", "nota_estetica": 6, "problemas": ["foto pequena"], "descricao": "Banheiro com bancada e cuba" },
+  { "arquivo": "foto-11.jpg", "ambiente": "suite", "nota_estetica": 8, "problemas": [], "descricao": "Suíte com cama de casal e sacada" },
+  { "arquivo": "foto-12.jpg", "ambiente": "varanda", "nota_estetica": 5, "problemas": ["foto pequena"], "descricao": "Sacada da suíte com bicicleta" },
+  { "arquivo": "foto-13.jpg", "ambiente": "cozinha", "nota_estetica": 5, "problemas": ["foto pequena", "ângulo repetido"], "descricao": "Cozinha com pastilhas e mesa" },
+  { "arquivo": "foto-14.jpg", "ambiente": "sala", "nota_estetica": 7, "problemas": [], "descricao": "Sala de jantar com mesa redonda" },
+  { "arquivo": "foto-15.jpg", "ambiente": "banheiro", "nota_estetica": 5, "problemas": ["foto pequena", "ambiente apertado"], "descricao": "Lavabo com mármore" },
+  { "arquivo": "foto-16.jpg", "ambiente": "area_servico", "nota_estetica": 4, "problemas": ["objetos espalhados"], "descricao": "Área de serviço com varal" }
+]

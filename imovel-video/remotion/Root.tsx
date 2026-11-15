@@ -9,7 +9,7 @@ const calc: CalculateMetadataFunction<PropertyVideoProps> = ({ props }) => ({
   durationInFrames: Math.max(1, timeline(props.storyboard).total),
 });
 
-const defaultProps: PropertyVideoProps = { storyboard: { modo: "padrao", ...demo } as unknown as Storyboard };
+const defaultProps: PropertyVideoProps = { storyboard: demo as unknown as Storyboard };
 
 export const Root: React.FC = () => (
   <>

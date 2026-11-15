@@ -102,7 +102,7 @@ export const Caption: React.FC<{ scene: Scene; brand: Brand; label?: string }> =
           display: showLabel ? "block" : "none",
           fontFamily: sans,
           fontWeight: 600,
-          fontSize: 22 * u,
+          fontSize: 30 * u,
           letterSpacing: 6 * u,
           textTransform: "uppercase",
           color: brand.cor,
@@ -116,9 +116,9 @@ export const Caption: React.FC<{ scene: Scene; brand: Brand; label?: string }> =
           ...useEnter(8),
           fontFamily: serif,
           fontWeight: 500,
-          fontSize: (vertical ? 76 : 70) * u,
+          fontSize: (vertical ? 104 : 92) * u,
           lineHeight: 1.08,
-          maxWidth: vertical ? "100%" : "62%",
+          maxWidth: vertical ? "100%" : "68%",
           textShadow: "0 2px 24px rgba(0,0,0,0.35)",
         }}
       >
@@ -129,8 +129,8 @@ export const Caption: React.FC<{ scene: Scene; brand: Brand; label?: string }> =
           style={{
             ...useEnter(14),
             fontFamily: sans,
-            fontWeight: 300,
-            fontSize: 34 * u,
+            fontWeight: 400,
+            fontSize: 48 * u,
             marginTop: 16 * u,
             opacity: 0.92,
           }}
@@ -150,8 +150,8 @@ const Chip: React.FC<{ text: string; delay: number }> = ({ text, delay }) => {
         ...useEnter(delay),
         fontFamily: sans,
         fontWeight: 400,
-        fontSize: 28 * u,
-        padding: `${12 * u}px ${24 * u}px`,
+        fontSize: 38 * u,
+        padding: `${14 * u}px ${30 * u}px`,
         borderRadius: 999,
         background: "rgba(255,255,255,0.14)",
         border: `${1.5 * u}px solid rgba(255,255,255,0.35)`,
@@ -169,7 +169,7 @@ export const Highlights: React.FC<{ items: string[] }> = ({ items }) => {
   const u = useUnit();
   const vertical = useVertical();
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 14 * u, marginTop: 30 * u, maxWidth: vertical ? "100%" : "70%" }}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 14 * u, marginTop: 34 * u, maxWidth: vertical ? "100%" : "75%" }}>
       {items.map((it, i) => (
         <Chip key={it} text={it} delay={18 + i * 5} />
       ))}
@@ -193,7 +193,7 @@ export const BrandTag: React.FC<{ brand: Brand }> = ({ brand }) => {
         color: "white",
         fontFamily: sans,
         fontWeight: 600,
-        fontSize: 22 * u,
+        fontSize: 28 * u,
         letterSpacing: 4 * u,
         textTransform: "uppercase",
         textShadow: "0 1px 12px rgba(0,0,0,0.4)",
@@ -228,15 +228,15 @@ export const Outro: React.FC<{ listing: Listing; brand: Brand; background: Scene
         style={{ justifyContent: "center", alignItems: "center", textAlign: "center", color: "white", padding: 80 * u }}
       >
         {cta ? (
-          <div style={{ ...useEnter(0), fontFamily: serif, fontWeight: 500, fontSize: (vertical ? 66 : 60) * u, lineHeight: 1.12, maxWidth: 900 * u, marginBottom: 56 * u }}>
+          <div style={{ ...useEnter(0), fontFamily: serif, fontWeight: 500, fontSize: (vertical ? 84 : 74) * u, lineHeight: 1.12, maxWidth: 960 * u, marginBottom: 56 * u }}>
             {cta}
           </div>
         ) : null}
-        <div style={{ ...useEnter(2), fontFamily: sans, fontWeight: 600, fontSize: 24 * u, letterSpacing: 8 * u, textTransform: "uppercase", color: brand.cor }}>
+        <div style={{ ...useEnter(2), fontFamily: sans, fontWeight: 600, fontSize: 32 * u, letterSpacing: 8 * u, textTransform: "uppercase", color: brand.cor }}>
           {listing.finalidade === "aluguel" ? "Para alugar" : "À venda"}
         </div>
         {listing.preco ? (
-          <div style={{ ...useEnter(6), fontFamily: serif, fontWeight: 500, fontSize: (vertical ? 108 : 120) * u, marginTop: 18 * u }}>
+          <div style={{ ...useEnter(6), fontFamily: serif, fontWeight: 500, fontSize: (vertical ? 136 : 140) * u, marginTop: 18 * u }}>
             {brl(listing.preco)}
             {listing.finalidade === "aluguel" ? <span style={{ fontSize: 44 * u }}>/mês</span> : null}
           </div>
@@ -244,18 +244,18 @@ export const Outro: React.FC<{ listing: Listing; brand: Brand; background: Scene
           <div style={{ ...useEnter(6), fontFamily: serif, fontSize: 84 * u, marginTop: 18 * u }}>Consulte</div>
         )}
         {custos.length ? (
-          <div style={{ ...useEnter(10), fontFamily: sans, fontWeight: 300, fontSize: 28 * u, marginTop: 14 * u, opacity: 0.85 }}>
+          <div style={{ ...useEnter(10), fontFamily: sans, fontWeight: 400, fontSize: 38 * u, marginTop: 14 * u, opacity: 0.9 }}>
             {custos.join("  ·  ")}
           </div>
         ) : null}
         <div style={{ ...useEnter(16), height: 1.5 * u, width: 120 * u, background: "rgba(255,255,255,0.5)", margin: `${44 * u}px 0` }} />
         {brand.logo ? <Img src={staticFile(brand.logo)} style={{ ...useEnter(18), height: 90 * u, marginBottom: 20 * u }} /> : null}
-        <div style={{ ...useEnter(18), fontFamily: serif, fontSize: 48 * u }}>{brand.nome}</div>
+        <div style={{ ...useEnter(18), fontFamily: serif, fontSize: 64 * u }}>{brand.nome}</div>
         {brand.contato ? (
-          <div style={{ ...useEnter(22), fontFamily: sans, fontWeight: 400, fontSize: 34 * u, marginTop: 14 * u }}>{brand.contato}</div>
+          <div style={{ ...useEnter(22), fontFamily: sans, fontWeight: 600, fontSize: 48 * u, marginTop: 14 * u }}>{brand.contato}</div>
         ) : null}
         {brand.creci ? (
-          <div style={{ ...useEnter(26), fontFamily: sans, fontWeight: 300, fontSize: 22 * u, marginTop: 12 * u, opacity: 0.7, letterSpacing: 2 * u }}>
+          <div style={{ ...useEnter(26), fontFamily: sans, fontWeight: 400, fontSize: 30 * u, marginTop: 12 * u, opacity: 0.8, letterSpacing: 2 * u }}>
             CRECI {brand.creci}
           </div>
         ) : null}

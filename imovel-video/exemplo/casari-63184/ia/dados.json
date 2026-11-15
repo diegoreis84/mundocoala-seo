@@ -1,0 +1,32 @@
+{
+  "titulo": "Alto padrão com 3 suítes",
+  "tipo": "Apartamento",
+  "finalidade": "venda",
+  "preco": 1280000,
+  "condominio": 1200,
+  "iptu": 167,
+  "area_m2": 137,
+  "area_terreno_m2": null,
+  "quartos": 3,
+  "suites": 3,
+  "banheiros": 3,
+  "vagas": 2,
+  "bairro": "Baeta Neves",
+  "cidade": "São Bernardo do Campo",
+  "diferenciais": [
+    "Sacada ampla com vista",
+    "Sala para vários ambientes",
+    "Cozinha ampla e funcional",
+    "Lavabo e área de serviço",
+    "Muita luz natural"
+  ],
+  "frases_por_ambiente": [
+    { "ambiente": "varanda", "frase": "Sacada ampla com vista" },
+    { "ambiente": "sala", "frase": "Sala para vários ambientes" },
+    { "ambiente": "cozinha", "frase": "Cozinha ampla e funcional" },
+    { "ambiente": "suite", "frase": "Três suítes amplas" },
+    { "ambiente": "escritorio", "frase": "Quarto que vira home office" },
+    { "ambiente": "banheiro", "frase": "Acabamento de qualidade" },
+    { "ambiente": "lazer", "frase": "Academia no condomínio" }
+  ]
+}

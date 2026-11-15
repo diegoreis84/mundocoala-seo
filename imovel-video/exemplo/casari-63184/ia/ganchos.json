@@ -1,0 +1,60 @@
+{
+  "ganchos": [
+    { "tipo": "desejo", "texto": "Imagine receber os amigos nesta sacada com vista.", "destaque": "sacada com vista" },
+    { "tipo": "estrutura", "texto": "Três suítes: cada pessoa da família com o seu espaço.", "destaque": "Três suítes:" },
+    { "tipo": "preco", "texto": "Olha o que você consegue comprar com R$ 1,28 milhão no Baeta Neves.", "destaque": "R$ 1,28 milhão" },
+    { "tipo": "localizacao", "texto": "Se você quer morar no Baeta Neves, preste atenção neste apartamento.", "destaque": "Baeta Neves," },
+    { "tipo": "curiosidade", "texto": "Espere até ver o que tem do outro lado desta sala.", "destaque": "outro lado" }
+  ],
+  "gancho_escolhido": 0,
+  "primeira_cena": "varanda",
+  "motivo_primeira_cena": "A sacada envidraçada com vista é a foto mais forte e o diferencial que o anúncio mais valoriza.",
+  "beneficios": [
+    { "ambiente": "sala", "frase": "Espaço para receber bem" },
+    { "ambiente": "cozinha", "frase": "Cozinha com espaço de verdade" },
+    { "ambiente": "suite", "frase": "Privacidade para cada um" },
+    { "ambiente": "escritorio", "frase": "Quarto que vira home office" },
+    { "ambiente": "banheiro", "frase": "Acabamento de qualidade" },
+    { "ambiente": "lazer", "frase": "Academia sem sair do prédio" }
+  ],
+  "desejo": { "ambiente": "sala", "frase": "Sala integrada à sacada" },
+  "roteiros": [
+    {
+      "nome": "Sacada e estilo de vida",
+      "gancho": "Imagine receber os amigos nesta sacada com vista.",
+      "blocos": [
+        { "tempo": "0–3 s", "fase": "gancho", "mostrar": "Sacada envidraçada com mesa e vista", "fala": "Imagine receber os amigos nesta sacada com vista." },
+        { "tempo": "3–15 s", "fase": "apresentacao", "mostrar": "Sala, cozinha, suíte, escritório, academia", "fala": "São 137 metros quadrados no Baeta Neves, com três suítes, sala para vários ambientes e cozinha ampla." },
+        { "tempo": "15–25 s", "fase": "desejo", "mostrar": "Sala integrada à sacada", "fala": "E a sala se abre inteira para a sacada: luz natural o dia todo." },
+        { "tempo": "25–30 s", "fase": "cta", "mostrar": "Preço e contato", "fala": "R$ 1,28 milhão. Quer conhecer pessoalmente? Me chama no direct e agende sua visita." }
+      ]
+    },
+    {
+      "nome": "Família e espaço",
+      "gancho": "Três suítes: cada pessoa da família com o seu espaço.",
+      "blocos": [
+        { "tempo": "0–3 s", "fase": "gancho", "mostrar": "Suíte com sacada", "fala": "Três suítes: cada pessoa da família com o seu espaço." },
+        { "tempo": "3–15 s", "fase": "apresentacao", "mostrar": "Suíte, banheiro, quarto/escritório, sala", "fala": "Privacidade para cada um, um quarto que vira home office e uma sala para vários ambientes." },
+        { "tempo": "15–25 s", "fase": "desejo", "mostrar": "Sacada com vista", "fala": "E para os fins de semana, uma sacada ampla para reunir todo mundo." },
+        { "tempo": "25–30 s", "fase": "cta", "mostrar": "Preço e contato", "fala": "137 m², 2 vagas, no Baeta Neves. Me chama no WhatsApp e agende sua visita." }
+      ]
+    },
+    {
+      "nome": "Preço e região",
+      "gancho": "Olha o que você consegue comprar com R$ 1,28 milhão no Baeta Neves.",
+      "blocos": [
+        { "tempo": "0–3 s", "fase": "gancho", "mostrar": "Sala ampla", "fala": "Olha o que você consegue comprar com R$ 1,28 milhão no Baeta Neves." },
+        { "tempo": "3–15 s", "fase": "apresentacao", "mostrar": "Sala, cozinha, sacada, suíte", "fala": "137 metros quadrados, três suítes, lavabo e duas vagas." },
+        { "tempo": "15–25 s", "fase": "desejo", "mostrar": "Sacada com vista", "fala": "Com essa sacada envidraçada para aproveitar a vista." },
+        { "tempo": "25–30 s", "fase": "cta", "mostrar": "Preço, condomínio e contato", "fala": "Condomínio de R$ 1.200. Quer conhecer? Agende sua visita pelo WhatsApp." }
+      ]
+    }
+  ],
+  "titulos_reels": [
+    "137 m² e 3 suítes no Baeta Neves",
+    "A sacada que faz este apartamento",
+    "O que R$ 1,28 milhão compra em São Bernardo?"
+  ],
+  "legenda": "Imagine receber os amigos nesta sacada com vista. 🌇\n\nApartamento de 137 m² no Baeta Neves, São Bernardo do Campo:\n✔ 3 suítes\n✔ Sala para vários ambientes integrada à sacada\n✔ Cozinha ampla, lavabo e 2 vagas\n\n💰 R$ 1.280.000 · Condomínio R$ 1.200 · IPTU R$ 167\n\n📲 Chama no WhatsApp (11) 95213-2088 e agende sua visita.",
+  "cta": "Quer conhecer pessoalmente? Agende sua visita."
+}

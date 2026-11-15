@@ -46,7 +46,7 @@ export const HookText: React.FC<{ texto: string; destaque?: string; brand: Brand
   const u = useUnit();
   const vertical = useVertical();
   const words = tokens(texto, destaque);
-  const size = (vertical ? 92 : 84) * u * (words.length > 11 ? 0.85 : 1);
+  const size = (vertical ? 112 : 96) * u * (words.length > 11 ? 0.88 : 1);
   return (
     <AbsoluteFill
       style={{
