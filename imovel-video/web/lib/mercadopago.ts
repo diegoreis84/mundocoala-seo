@@ -11,7 +11,7 @@
  * Sem MP_ACCESS_TOKEN e fora de produção, o site também usa o MODO TESTE.
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { confirmarPagamento } from "./db";
+import { getRepo } from "./repo";
 
 const API = "https://api.mercadopago.com";
 
@@ -64,7 +64,7 @@ export async function processarPagamento(pagamentoId: string): Promise<"aprovado
   const pg = (await res.json()) as { status: string; external_reference?: string; transaction_amount?: number };
   if (!pg.external_reference) return "ignorado";
   if (pg.status === "approved") {
-    confirmarPagamento(pg.external_reference, pagamentoId, Math.round((pg.transaction_amount ?? 0) * 100));
+    await (await getRepo()).confirmarPagamento(pg.external_reference, pagamentoId, Math.round((pg.transaction_amount ?? 0) * 100));
     return "aprovado";
   }
   if (pg.status === "rejected" || pg.status === "cancelled") return "recusado";

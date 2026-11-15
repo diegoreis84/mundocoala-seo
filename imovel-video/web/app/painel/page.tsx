@@ -2,14 +2,14 @@ import Link from "next/link";
 import { AutoAtualizar } from "@/components/AutoAtualizar";
 import { Erro } from "@/components/Erro";
 import { exigirUsuario } from "@/lib/auth";
-import { db, type Video } from "@/lib/db";
+import { getRepo } from "@/lib/repo";
 import { STATUS } from "@/lib/status";
 import { gerarVideo } from "../actions";
 
 export default async function Painel({ searchParams }: { searchParams: Promise<{ erro?: string; ok?: string }> }) {
   const u = await exigirUsuario();
   const { erro, ok } = await searchParams;
-  const videos = db().prepare("SELECT * FROM videos WHERE usuario_id = ? ORDER BY criado_em DESC LIMIT 100").all(u.id) as Video[];
+  const videos = await (await getRepo()).listarVideos(u.id);
   const andamento = videos.some((v) => v.status === "na_fila" || v.status === "processando");
 
   return (
@@ -50,7 +50,7 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
                 <div style={{ minWidth: 0 }}>
                   <div className="t">{v.titulo || v.url}</div>
                   <div className="small muted">
-                    {new Date(v.criado_em + "Z").toLocaleString("pt-BR")}
+                    {new Date(v.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
                     {v.etapa ? ` · ${v.etapa}` : ""}
                   </div>
                 </div>

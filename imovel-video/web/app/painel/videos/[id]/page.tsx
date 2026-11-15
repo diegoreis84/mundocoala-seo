@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { AutoAtualizar } from "@/components/AutoAtualizar";
 import { Copiar } from "@/components/Copiar";
 import { exigirUsuario } from "@/lib/auth";
-import { db, type Video } from "@/lib/db";
+import { getRepo } from "@/lib/repo";
 import { STATUS } from "@/lib/status";
 
 type Resultado = { videos: string[]; kit: string | null; legenda: string | null; ganchos: string[]; titulos: string[] };
@@ -19,7 +19,7 @@ const ORDEM = Object.keys(NOMES);
 export default async function VideoPage({ params }: { params: Promise<{ id: string }> }) {
   const u = await exigirUsuario();
   const { id } = await params;
-  const v = db().prepare("SELECT * FROM videos WHERE id = ? AND usuario_id = ?").get(id, u.id) as Video | undefined;
+  const v = await (await getRepo()).videoDoUsuario(id, u.id);
   if (!v) notFound();
   const r: Resultado | null = v.resultado ? JSON.parse(v.resultado) : null;
   const arquivo = (nome: string) => `/api/arquivos/${v.id}/${nome}`;

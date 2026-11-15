@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { exigirUsuario } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getRepo } from "@/lib/repo";
 import { modoTeste } from "@/lib/mercadopago";
 import { brl } from "@/lib/planos";
 import { simularPagamento } from "../../../actions";
@@ -9,9 +9,7 @@ export default async function PagamentoTeste({ params }: { params: Promise<{ id:
   if (!modoTeste()) notFound();
   const u = await exigirUsuario();
   const { id } = await params;
-  const p = db().prepare("SELECT * FROM pedidos WHERE id = ? AND usuario_id = ?").get(id, u.id) as
-    | { creditos: number; valor_centavos: number; status: string }
-    | undefined;
+  const p = await (await getRepo()).pedidoDoUsuario(id, u.id);
   if (!p) notFound();
   return (
     <section>
