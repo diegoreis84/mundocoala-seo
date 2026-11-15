@@ -45,7 +45,7 @@ export function fallbackListing(texto: string): Listing {
   const firstLine = texto.split("\n").find((l) => l.trim()) ?? "Imóvel à venda";
   return {
     titulo: firstLine.trim().slice(0, 40),
-    tipo: /casa/i.test(texto) ? "Casa" : /cobertura/i.test(texto) ? "Cobertura" : "Apartamento",
+    tipo: /\bapartamento\b/i.test(texto) ? "Apartamento" : /\bcobertura\b/i.test(texto) ? "Cobertura" : /\bcasa\b/i.test(texto) ? "Casa" : "Imóvel",
     finalidade: /alug|loca[cç]/i.test(texto) ? "aluguel" : "venda",
     preco,
     condominio: find(/condom[ií]nio[^\d]{0,12}([\d.]+(?:,\d+)?)/i),

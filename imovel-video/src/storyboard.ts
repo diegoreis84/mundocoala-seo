@@ -126,6 +126,7 @@ export function selectPhotos(photos: ScoredPhoto[], maxCenas = 8, notaMinima = 3
   });
   const best = (room: Room) => pool.filter((p) => p.ambiente === room).sort((a, b) => b.nota_final - a.nota_final);
 
+  const semAmbientes = pool.filter((p) => p.ambiente === "outro").length > pool.length / 2;
   const chosen: ScoredPhoto[] = [];
   // Abertura: melhor fachada ou vista; senão, a melhor foto geral.
   const opening = [...best("fachada"), ...best("vista")].sort((a, b) => b.nota_final - a.nota_final)[0]
@@ -136,12 +137,14 @@ export function selectPhotos(photos: ScoredPhoto[], maxCenas = 8, notaMinima = 3
   for (const pass of [1, 2]) {
     for (const [room, max] of TOUR) {
       const already = chosen.filter((c) => c.ambiente === room).length;
-      const limit = pass === 1 ? 1 : max;
+      // Sem classificação de ambientes (modo sem IA), "outro" pode ocupar as vagas restantes.
+      const limit = pass === 1 ? 1 : room === "outro" && semAmbientes ? maxCenas : max;
+      let count = already;
       for (const p of best(room)) {
-        if (chosen.length >= maxCenas || already >= limit) break;
+        if (chosen.length >= maxCenas || count >= limit) break;
         if (chosen.includes(p)) continue;
         chosen.push(p);
-        break;
+        count++;
       }
     }
   }
@@ -215,7 +218,7 @@ export function buildHookStoryboard(opts: {
   const seen = new Set<Room>();
   const apresentacao = ordered
     .filter((p) => p !== hookPhoto && p !== desirePhoto)
-    .filter((p) => (seen.has(p.ambiente) ? false : (seen.add(p.ambiente), true)))
+    .filter((p) => p.ambiente === "outro" || (seen.has(p.ambiente) ? false : (seen.add(p.ambiente), true)))
     .slice(0, 5);
   // Segunda cena de desejo: outro ambiente de lazer/vista, senão a melhor foto ainda não usada.
   const taken = new Set([hookPhoto, desirePhoto, ...apresentacao]);

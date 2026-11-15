@@ -7,7 +7,11 @@ Regras:
 - Use somente o que está escrito no anúncio. Se um dado não aparece, devolva null. Nunca invente números.
 - "diferenciais": o que mais vende o imóvel, em frases de até 4 palavras, em ordem de impacto.
 - "frases_por_ambiente": uma frase curta e elegante (até 5 palavras) por ambiente mencionado, baseada no texto.
-- Textos em português do Brasil, sem emojis e sem exageros ("imperdível", "oportunidade única").`;
+- Textos em português do Brasil, sem emojis e sem exageros ("imperdível", "oportunidade única").
+- O texto pode ser a página inteira do site (menus, formulários, rodapé, telefones da imobiliária, imóveis similares).
+  Use apenas o que descreve ESTE imóvel. Priorize a descrição e a ficha (preço, m², quartos, vagas).
+- Listas de "características" de sites costumam ser checklists genéricas com todas as opções
+  (ex.: vista para o mar E para montanha E para lago). Só use um item dessas listas se a descrição confirmar.`;
 
 export async function extractListing(texto: string): Promise<Listing> {
   const response = await getClient().messages.parse({
