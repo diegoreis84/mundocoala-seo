@@ -1,5 +1,6 @@
 {
   "versao": 1,
+  "modo": "padrao",
   "imovel": {
     "titulo": "Apartamento com vista para o parque",
     "tipo": "Apartamento",
@@ -8,6 +9,7 @@
     "condominio": 1850,
     "iptu": 420,
     "area_m2": 128,
+    "area_terreno_m2": null,
     "quartos": 3,
     "suites": 2,
     "banheiros": 3,

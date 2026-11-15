@@ -19,13 +19,15 @@ export async function renderStoryboard(opts: {
   assetsDir: string;
   outDir: string;
   formatos: Formato[];
+  /** Prefixo do arquivo (ex.: "padrao" → video-padrao-vertical.mp4). */
+  nome?: string;
   trilha?: string;
   onProgress?: (formato: Formato, p: number) => void;
 }): Promise<string[]> {
   const { storyboard, outDir } = opts;
 
   // Pasta pública só com o que o vídeo usa.
-  const publicDir = path.join(outDir, "public");
+  const publicDir = path.join(outDir, `public-${opts.nome ?? "video"}`);
   await fs.rm(publicDir, { recursive: true, force: true });
   await fs.mkdir(publicDir, { recursive: true });
   const files = new Set(storyboard.cenas.flatMap((c) => [c.foto, c.video].filter(Boolean) as string[]));
@@ -41,7 +43,7 @@ export async function renderStoryboard(opts: {
   const outputs: string[] = [];
   for (const formato of opts.formatos) {
     const composition = await selectComposition({ serveUrl, id: COMPOSITION[formato], inputProps, browserExecutable });
-    const outputLocation = path.join(outDir, `video-${formato}.mp4`);
+    const outputLocation = path.join(outDir, `video-${opts.nome ? opts.nome + "-" : ""}${formato}.mp4`);
     await renderMedia({
       composition,
       serveUrl,

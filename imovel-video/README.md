@@ -4,6 +4,14 @@ Gera vídeos de divulgação de imóveis a partir das **fotos** e do **texto do 
 escolhe as melhores fotos, monta um roteiro de visita e aplica as informações do anúncio
 com um visual elegante, em **9:16** (Reels/TikTok/Shorts) e **16:9** (portais/YouTube).
 
+Duas versões por imóvel:
+- **Padrão** — tour elegante pelos ambientes, com as informações do anúncio.
+- **Ganchos** — feito para Reels/TikTok: gancho nos 3 primeiros segundos, apresentação em cortes rápidos
+  com características transformadas em benefícios, fase de desejo e chamada para ação
+  (0–3 s gancho · 3–15 s apresentação · 15–25 s desejo · 25–30 s CTA). Junto vem o **kit de divulgação**
+  (`kit-ganchos.md`): 5 ganchos, 3 roteiros de até 30 s, 3 títulos para Reels, legenda com WhatsApp e
+  qual característica mostrar primeiro.
+
 MVP do produto. Por enquanto roda pela linha de comando; a API/SaaS vem depois (ver "Próximos passos").
 
 ## Como funciona
@@ -37,11 +45,12 @@ npm run gerar -- --fotos exemplo/fotos --anuncio exemplo/anuncio.txt --marca exe
 
 # Só o roteiro, para revisar antes de renderizar
 npm run gerar -- --fotos <pasta> --anuncio <arquivo.txt> --so-roteiro
-# ...edite out/<pasta>/roteiro.json e renderize:
-npm run gerar -- --fotos <pasta> --roteiro out/<pasta>/roteiro.json
+# ...edite out/<pasta>/roteiro-ganchos.json e renderize:
+npm run gerar -- --fotos <pasta> --roteiro out/<pasta>/roteiro-ganchos.json
 ```
 
-Saída em `out/<nome-da-pasta>/`: `video-vertical.mp4`, `video-horizontal.mp4`, `roteiro.json`, `ranking.json`.
+Saída em `out/<nome-da-pasta>/`: `video-{padrao,ganchos}-{vertical,horizontal}.mp4`, `roteiro-{padrao,ganchos}.json`,
+`kit-ganchos.md`/`.json` e `ranking.json`. Use `--modos padrao` ou `--modos ganchos` para gerar só um.
 
 Opções: `--formatos vertical,horizontal`, `--max-cenas 8`, `--trilha musica.mp3` (dentro da pasta de fotos),
 `--sem-ia`. Modelo: `IMOVEL_MODEL` (padrão `claude-opus-5-5`).
@@ -63,6 +72,8 @@ O `logo` é um arquivo dentro da pasta de fotos.
 | `src/ai/analyzePhotos.ts` | Fotos → ambiente, nota estética, problemas (em lotes de 12, 1024px) |
 | `src/curation/fallback.ts` | Heurísticas sem IA (modo demo) |
 | `src/storyboard.ts` | Nota final, duplicadas, roteiro de visita, legendas |
+| `src/hooks/` | Método de ganchos, geração com IA, modelos sem IA e kit em Markdown |
+| `remotion/HookScene.tsx` | Tela do gancho (palavra a palavra, destaque) e barra de progresso |
 | `src/video/provider.ts` | Interface para animação por IA (Veo, Kling, Runway...) + prompt seguro |
 | `src/render.ts` | Render com Remotion |
 | `remotion/` | Modelo visual (composições `Vertical` e `Horizontal`) |

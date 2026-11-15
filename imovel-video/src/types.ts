@@ -47,7 +47,8 @@ export const ListingSchema = z.object({
   preco: z.number().nullable().describe("Preço em reais, sem centavos"),
   condominio: z.number().nullable(),
   iptu: z.number().nullable(),
-  area_m2: z.number().nullable().describe("Área privativa/útil"),
+  area_m2: z.number().nullable().describe("Área privativa/útil/construída"),
+  area_terreno_m2: z.number().nullable().describe("Área do terreno (casas), se informada"),
   quartos: z.number().nullable(),
   suites: z.number().nullable(),
   banheiros: z.number().nullable(),
@@ -98,6 +99,8 @@ export const SceneSchema = z.object({
   duracao_s: z.number(),
   /** Se definido, um clipe animado (ex.: Veo) substitui o efeito de câmera. */
   video: z.string().optional(),
+  /** Papel da cena no vídeo com gancho. */
+  fase: z.enum(["gancho", "apresentacao", "desejo"]).optional(),
 });
 export type Scene = z.infer<typeof SceneSchema>;
 
@@ -117,5 +120,55 @@ export const StoryboardSchema = z.object({
   destaques: z.array(z.string()).describe("Chips da cena de abertura"),
   cenas: z.array(SceneSchema),
   descartadas: z.array(z.object({ foto: z.string(), motivo: z.string() })),
+  modo: z.enum(["padrao", "ganchos"]).default("padrao"),
+  /** Texto do gancho (0–3 s) e palavra a destacar. */
+  gancho: z.object({ texto: z.string(), destaque: z.string().optional() }).optional(),
+  /** Chamada para ação do encerramento. */
+  cta: z.string().optional(),
 });
 export type Storyboard = z.infer<typeof StoryboardSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Kit de ganchos                                                       */
+/* ------------------------------------------------------------------ */
+
+export const HOOK_TYPES = ["preco", "localizacao", "estrutura", "desejo", "curiosidade"] as const;
+export const HookTypeSchema = z.enum(HOOK_TYPES);
+export type HookType = z.infer<typeof HookTypeSchema>;
+
+export const HookSchema = z.object({
+  tipo: HookTypeSchema,
+  texto: z.string().describe("Gancho para os 3 primeiros segundos, até 14 palavras"),
+  destaque: z.string().describe("Trecho do gancho (1 a 3 palavras, copiado exatamente) para destacar na tela"),
+});
+export type Hook = z.infer<typeof HookSchema>;
+
+export const ScriptSchema = z.object({
+  nome: z.string().describe("Nome curto da abordagem"),
+  gancho: z.string(),
+  blocos: z.array(
+    z.object({
+      tempo: z.string().describe('Ex.: "0–3 s"'),
+      fase: z.enum(["gancho", "apresentacao", "desejo", "cta"]),
+      mostrar: z.string().describe("O que aparece na tela (ambientes/fotos)"),
+      fala: z.string().describe("O que o corretor fala ou o texto narrado"),
+    }),
+  ),
+});
+export type Script = z.infer<typeof ScriptSchema>;
+
+export const HookPackSchema = z.object({
+  ganchos: z.array(HookSchema).describe("5 ganchos de tipos variados"),
+  gancho_escolhido: z.number().describe("Índice (0-4) do gancho mais forte para o vídeo"),
+  primeira_cena: RoomSchema.describe("Ambiente/característica que deve aparecer primeiro"),
+  motivo_primeira_cena: z.string(),
+  beneficios: z
+    .array(z.object({ ambiente: RoomSchema, frase: z.string() }))
+    .describe("Característica transformada em benefício, até 6 palavras, por ambiente"),
+  desejo: z.object({ ambiente: RoomSchema, frase: z.string() }).describe("Melhor ambiente/diferencial para a fase de desejo"),
+  roteiros: z.array(ScriptSchema).describe("3 roteiros de até 30 s com abordagens diferentes"),
+  titulos_reels: z.array(z.string()).describe("3 títulos para Reels"),
+  legenda: z.string().describe("Legenda do post com chamada para WhatsApp"),
+  cta: z.string().describe("Chamada para ação curta para a tela final, até 10 palavras"),
+});
+export type HookPack = z.infer<typeof HookPackSchema>;

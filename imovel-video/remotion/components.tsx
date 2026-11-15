@@ -85,7 +85,7 @@ export const Caption: React.FC<{ scene: Scene; brand: Brand; label?: string }> =
   const vertical = useVertical();
   const frame = useCurrentFrame();
   const rotulo = label ?? ROOM_LABEL[scene.ambiente];
-  const showLabel = rotulo.toLowerCase() !== scene.titulo.toLowerCase();
+  const showLabel = rotulo !== "" && rotulo.toLowerCase() !== scene.titulo.toLowerCase();
   const line = interpolate(frame, [6, 22], [0, 64 * u], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease });
   return (
     <AbsoluteFill
@@ -208,11 +208,12 @@ export const BrandTag: React.FC<{ brand: Brand }> = ({ brand }) => {
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 /** Encerramento: preço, custos mensais e contato. */
-export const Outro: React.FC<{ listing: Listing; brand: Brand; background: Scene; durationInFrames: number }> = ({
+export const Outro: React.FC<{ listing: Listing; brand: Brand; background: Scene; durationInFrames: number; cta?: string }> = ({
   listing,
   brand,
   background,
   durationInFrames,
+  cta,
 }) => {
   const u = useUnit();
   const vertical = useVertical();
@@ -226,6 +227,11 @@ export const Outro: React.FC<{ listing: Listing; brand: Brand; background: Scene
       <AbsoluteFill
         style={{ justifyContent: "center", alignItems: "center", textAlign: "center", color: "white", padding: 80 * u }}
       >
+        {cta ? (
+          <div style={{ ...useEnter(0), fontFamily: serif, fontWeight: 500, fontSize: (vertical ? 66 : 60) * u, lineHeight: 1.12, maxWidth: 900 * u, marginBottom: 56 * u }}>
+            {cta}
+          </div>
+        ) : null}
         <div style={{ ...useEnter(2), fontFamily: sans, fontWeight: 600, fontSize: 24 * u, letterSpacing: 8 * u, textTransform: "uppercase", color: brand.cor }}>
           {listing.finalidade === "aluguel" ? "Para alugar" : "À venda"}
         </div>

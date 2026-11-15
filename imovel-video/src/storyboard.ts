@@ -3,6 +3,7 @@ import { colorDistance, hamming } from "./curation/metrics.js";
 import {
   ROOM_LABEL,
   type Brand,
+  type HookPack,
   type Listing,
   type Motion,
   type PhotoAnalysis,
@@ -118,21 +119,13 @@ export function highlights(l: Listing): string[] {
   return h.slice(0, 4);
 }
 
-export function buildStoryboard(opts: {
-  photos: ScoredPhoto[];
-  listing: Listing;
-  brand: Brand;
-  maxCenas?: number;
-  notaMinima?: number;
-}): Storyboard {
-  const { listing, brand } = opts;
-  const maxCenas = opts.maxCenas ?? 8;
-  const notaMinima = opts.notaMinima ?? 3;
-
-  const { kept, dropped } = dedupe(opts.photos);
+/** Escolhe as fotos: remove duplicadas/ruins e monta o roteiro de visita. */
+export function selectPhotos(photos: ScoredPhoto[], maxCenas = 8, notaMinima = 3) {
+  const { kept, dropped } = dedupe(photos);
   const descartadas = [...dropped];
   const pool = kept.filter((p) => {
-    if (p.nota_final < notaMinima) descartadas.push({ foto: p.arquivo, motivo: `nota baixa (${p.nota_final}${[...p.problemas_tecnicos, ...p.problemas].length ? ": " + [...p.problemas_tecnicos, ...p.problemas].join(", ") : ""})` });
+    const probs = [...p.problemas_tecnicos, ...p.problemas];
+    if (p.nota_final < notaMinima) descartadas.push({ foto: p.arquivo, motivo: `nota baixa (${p.nota_final}${probs.length ? ": " + probs.join(", ") : ""})` });
     else if (SKIP.includes(p.ambiente)) descartadas.push({ foto: p.arquivo, motivo: `ambiente ${p.ambiente}` });
     else return true;
     return false;
@@ -159,18 +152,34 @@ export function buildStoryboard(opts: {
     }
   }
   // Mantém a ordem do roteiro (a 2ª passada adiciona no fim).
-  const order = (r: Room) => (r === "fachada" || r === "vista" ? -1 : TOUR.findIndex(([t]) => t === r));
   const [first, ...rest] = chosen;
-  const ordered = first ? [first, ...rest.sort((a, b) => order(a.ambiente) - order(b.ambiente))] : [];
+  const ordered = first ? [first, ...rest.sort((a, b) => tourOrder(a.ambiente) - tourOrder(b.ambiente))] : [];
+  return { ordered, pool, best, descartadas };
+}
 
-  for (const p of pool) if (!chosen.includes(p)) descartadas.push({ foto: p.arquivo, motivo: "fora do limite de cenas" });
+const numbers = (s: string) => s.match(/\d[\d.,]*/g)?.join("|") ?? "";
+const sameNumbers = (a: string, b: string) => numbers(a) !== "" && numbers(a) === numbers(b);
+
+const tourOrder = (r: Room) => (r === "fachada" || r === "vista" ? -1 : TOUR.findIndex(([t]) => t === r));
+const base = (p: ScoredPhoto) => path.basename(p.caminho);
+
+export function buildStoryboard(opts: {
+  photos: ScoredPhoto[];
+  listing: Listing;
+  brand: Brand;
+  maxCenas?: number;
+  notaMinima?: number;
+}): Storyboard {
+  const { listing, brand } = opts;
+  const { ordered, pool, descartadas } = selectPhotos(opts.photos, opts.maxCenas, opts.notaMinima);
+  for (const p of pool) if (!ordered.includes(p)) descartadas.push({ foto: p.arquivo, motivo: "fora do limite de cenas" });
 
   const used = new Set<string>();
   const local = [listing.bairro, listing.cidade].filter(Boolean).join(", ");
   const cenas: Scene[] = ordered.map((p, i) => {
     const cap = i === 0 ? { titulo: listing.titulo, subtitulo: local || listing.tipo } : caption(p.ambiente, listing, used);
     return {
-      foto: path.basename(p.caminho),
+      foto: base(p),
       ambiente: p.ambiente,
       ...cap,
       movimento: MOTIONS[i % MOTIONS.length],
@@ -178,5 +187,111 @@ export function buildStoryboard(opts: {
     };
   });
 
-  return { versao: 1, imovel: listing, marca: brand, destaques: highlights(listing), cenas, descartadas };
+  return { versao: 1, modo: "padrao", imovel: listing, marca: brand, destaques: highlights(listing), cenas, descartadas };
+}
+
+/**
+ * Vídeo com gancho (até ~30 s):
+ * 0–3 s gancho · 3–15 s apresentação (cortes rápidos, benefícios) · 15–25 s desejo · 25–30 s CTA.
+ */
+export function buildHookStoryboard(opts: {
+  photos: ScoredPhoto[];
+  listing: Listing;
+  brand: Brand;
+  pack: HookPack;
+  notaMinima?: number;
+}): Storyboard {
+  const { listing, brand, pack } = opts;
+  const { ordered, pool, best, descartadas } = selectPhotos(opts.photos, 10, opts.notaMinima);
+  const top = [...pool].sort((a, b) => b.nota_final - a.nota_final);
+  const hook = pack.ganchos[pack.gancho_escolhido] ?? pack.ganchos[0];
+
+  const hookPhoto = best(pack.primeira_cena)[0] ?? ordered[0];
+  const desirePhoto =
+    best(pack.desejo.ambiente).find((p) => p !== hookPhoto) ?? top.find((p) => p !== hookPhoto);
+  // Apresentação: um ambiente por corte (ritmo rápido), até 5 cortes.
+  const seen = new Set<Room>();
+  const apresentacao = ordered
+    .filter((p) => p !== hookPhoto && p !== desirePhoto)
+    .filter((p) => (seen.has(p.ambiente) ? false : (seen.add(p.ambiente), true)))
+    .slice(0, 5);
+  // Segunda cena de desejo: outro ambiente de lazer/vista, senão a melhor foto ainda não usada.
+  const taken = new Set([hookPhoto, desirePhoto, ...apresentacao]);
+  const desire2 =
+    (["piscina", "lazer", "varanda", "vista"] as Room[]).flatMap((r) => best(r)).find((p) => !taken.has(p)) ??
+    top.find((p) => !taken.has(p));
+  const usedPhotos = [hookPhoto, ...apresentacao, desirePhoto, desire2].filter(Boolean) as ScoredPhoto[];
+  for (const p of pool) if (!usedPhotos.includes(p)) descartadas.push({ foto: p.arquivo, motivo: "fora do limite de cenas" });
+
+  const used = new Set<string>();
+  const benefits = [...pack.beneficios];
+  const benefitFor = (room: Room) => {
+    const i = benefits.findIndex((b) => b.ambiente === room);
+    return i >= 0 ? benefits.splice(i, 1)[0].frase : undefined;
+  };
+
+  const cenas: Scene[] = [];
+  if (hookPhoto) {
+    cenas.push({
+      foto: base(hookPhoto),
+      ambiente: hookPhoto.ambiente,
+      titulo: hook.texto,
+      movimento: "zoom_in",
+      duracao_s: 3,
+      fase: "gancho",
+    });
+  }
+  apresentacao.forEach((p, i) => {
+    const cap = caption(p.ambiente, listing, used);
+    const beneficio = benefitFor(p.ambiente);
+    cenas.push({
+      foto: base(p),
+      ambiente: p.ambiente,
+      titulo: beneficio ?? cap.titulo,
+      subtitulo: beneficio
+        ? cap.titulo !== ROOM_LABEL[p.ambiente]
+          ? cap.titulo
+          : cap.subtitulo && !sameNumbers(beneficio, cap.subtitulo)
+            ? cap.subtitulo
+            : undefined
+        : cap.subtitulo,
+      movimento: MOTIONS[(i + 1) % MOTIONS.length],
+      duracao_s: 2.4,
+      fase: "apresentacao",
+    });
+  });
+  if (desirePhoto) {
+    cenas.push({
+      foto: base(desirePhoto),
+      ambiente: desirePhoto.ambiente,
+      titulo: pack.desejo.frase,
+      movimento: "zoom_out",
+      duracao_s: 4.5,
+      fase: "desejo",
+    });
+  }
+  if (desire2) {
+    const cap = caption(desire2.ambiente, listing, used);
+    cenas.push({
+      foto: base(desire2),
+      ambiente: desire2.ambiente,
+      titulo: benefitFor(desire2.ambiente) ?? cap.titulo,
+      subtitulo: cap.subtitulo,
+      movimento: "pan_direita",
+      duracao_s: 3.5,
+      fase: "desejo",
+    });
+  }
+
+  return {
+    versao: 1,
+    modo: "ganchos",
+    imovel: listing,
+    marca: brand,
+    destaques: highlights(listing),
+    cenas,
+    descartadas,
+    gancho: { texto: hook.texto, destaque: hook.destaque },
+    cta: pack.cta,
+  };
 }

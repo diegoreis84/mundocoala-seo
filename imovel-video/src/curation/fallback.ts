@@ -51,6 +51,7 @@ export function fallbackListing(texto: string): Listing {
     condominio: find(/condom[ií]nio[^\d]{0,12}([\d.]+(?:,\d+)?)/i),
     iptu: find(/iptu[^\d]{0,12}([\d.]+(?:,\d+)?)/i),
     area_m2: find(/([\d.,]+)\s*m(?:²|2)/i),
+    area_terreno_m2: find(/terreno[^\d]{0,20}([\d.,]+)\s*m/i),
     quartos: find(/(\d+)\s*(?:quartos|dormit)/i),
     suites: find(/(\d+)\s*su[ií]tes?/i),
     banheiros: find(/(\d+)\s*banheiros?/i),

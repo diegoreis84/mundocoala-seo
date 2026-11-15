@@ -5,8 +5,12 @@ import { hasCredentials } from "./ai/client.js";
 import { extractListing } from "./ai/extractListing.js";
 import { fallbackAnalysis, fallbackListing } from "./curation/fallback.js";
 import { computeMetrics } from "./curation/metrics.js";
-import { buildStoryboard, scorePhotos } from "./storyboard.js";
-import type { Brand, Storyboard } from "./types.js";
+import { generateHookPack } from "./hooks/generate.js";
+import { templateHookPack } from "./hooks/templates.js";
+import { buildHookStoryboard, buildStoryboard, scorePhotos, selectPhotos } from "./storyboard.js";
+import type { Brand, HookPack, Storyboard } from "./types.js";
+
+export type Modo = "padrao" | "ganchos";
 
 const IMAGE_EXT = /\.(jpe?g|png|webp|avif|heic)$/i;
 
@@ -15,14 +19,19 @@ export async function listPhotos(dir: string): Promise<string[]> {
   return entries.filter((f) => IMAGE_EXT.test(f)).sort().map((f) => path.join(dir, f));
 }
 
-export async function createStoryboard(opts: {
+export async function createStoryboards(opts: {
   fotosDir: string;
   anuncio: string;
   marca: Brand;
+  modos: Modo[];
   maxCenas?: number;
   usarIA?: boolean;
   log?: (msg: string) => void;
-}): Promise<{ storyboard: Storyboard; ranking: { arquivo: string; ambiente: string; nota: number }[] }> {
+}): Promise<{
+  storyboards: Storyboard[];
+  pack?: HookPack;
+  ranking: { arquivo: string; ambiente: string; nota: number }[];
+}> {
   const log = opts.log ?? (() => {});
   const usarIA = opts.usarIA ?? hasCredentials();
   const files = await listPhotos(opts.fotosDir);
@@ -43,11 +52,24 @@ export async function createStoryboard(opts: {
     analysesP = Promise.resolve(metrics.map(fallbackAnalysis));
   }
   const [listing, analyses] = await Promise.all([listingP, analysesP]);
-
   const scored = scorePhotos(metrics, analyses);
-  const storyboard = buildStoryboard({ photos: scored, listing, brand: opts.marca, maxCenas: opts.maxCenas });
+
+  const storyboards: Storyboard[] = [];
+  if (opts.modos.includes("padrao")) {
+    storyboards.push(buildStoryboard({ photos: scored, listing, brand: opts.marca, maxCenas: opts.maxCenas }));
+  }
+  let pack: HookPack | undefined;
+  if (opts.modos.includes("ganchos")) {
+    const ambientes = selectPhotos(scored, 12).pool.map((p) => p.ambiente);
+    log(usarIA ? "Criando ganchos, roteiros e legenda com IA..." : "Criando ganchos a partir dos modelos...");
+    pack = usarIA
+      ? await generateHookPack(listing, ambientes, opts.marca.contato)
+      : templateHookPack(listing, ambientes, opts.marca.contato);
+    storyboards.push(buildHookStoryboard({ photos: scored, listing, brand: opts.marca, pack }));
+  }
+
   const ranking = [...scored]
     .sort((a, b) => b.nota_final - a.nota_final)
     .map((p) => ({ arquivo: p.arquivo, ambiente: p.ambiente, nota: p.nota_final }));
-  return { storyboard, ranking };
+  return { storyboards, pack, ranking };
 }
