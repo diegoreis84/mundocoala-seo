@@ -1,11 +1,11 @@
 /**
  * Avisa o processador de vídeos que há trabalho na fila.
- * No Google Cloud, executa o Cloud Run Job (CLOUD_RUN_JOB, GOOGLE_CLOUD_PROJECT, REGIAO).
+ * No Google Cloud, executa o Cloud Run Job (CLOUD_RUN_JOB, PROJETO_GCP, REGIAO).
  * Localmente não faz nada: o worker em loop pega o vídeo sozinho.
  */
 export async function dispararProcessador(): Promise<void> {
   const job = process.env.CLOUD_RUN_JOB;
-  const projeto = process.env.GOOGLE_CLOUD_PROJECT;
+  const projeto = process.env.PROJETO_GCP;
   const regiao = process.env.REGIAO;
   if (!job || !projeto || !regiao) return;
   try {

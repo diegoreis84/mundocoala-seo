@@ -65,6 +65,8 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
               ))}
             </div>
 
+            <p className="small muted">Os arquivos ficam disponíveis por 90 dias. Baixe os vídeos para guardar.</p>
+
             {r.legenda ? (
               <div className="card">
                 <div className="row" style={{ justifyContent: "space-between" }}>

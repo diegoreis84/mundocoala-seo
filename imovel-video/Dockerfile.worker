@@ -22,6 +22,9 @@ COPY src ./src
 COPY remotion ./remotion
 COPY web/lib ./web/lib
 
+# Cache do webpack (Remotion) gravável pelo usuário sem privilégios: renders seguintes mais rápidos.
+RUN mkdir -p node_modules/.cache && chown -R node:node node_modules/.cache
+
 ENV NODE_ENV=production BANCO=firestore ARMAZENAMENTO=gcs
 USER node
 CMD ["npx", "tsx", "src/worker.ts", "--uma-vez"]

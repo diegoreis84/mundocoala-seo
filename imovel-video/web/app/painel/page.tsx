@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AutoAtualizar } from "@/components/AutoAtualizar";
 import { Erro } from "@/components/Erro";
 import { exigirUsuario } from "@/lib/auth";
+import { dispararProcessador } from "@/lib/processador";
 import { getRepo } from "@/lib/repo";
 import { STATUS } from "@/lib/status";
 import { gerarVideo } from "../actions";
@@ -11,6 +12,10 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
   const { erro, ok } = await searchParams;
   const videos = await (await getRepo()).listarVideos(u.id);
   const andamento = videos.some((v) => v.status === "na_fila" || v.status === "processando");
+  // Rede de segurança: se um vídeo está na fila há mais de 3 min, o aviso ao processador pode ter se perdido.
+  if (videos.some((v) => v.status === "na_fila" && Date.now() - Date.parse(v.criado_em) > 3 * 60_000)) {
+    await dispararProcessador();
+  }
 
   return (
     <section>

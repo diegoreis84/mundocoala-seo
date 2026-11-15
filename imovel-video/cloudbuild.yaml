@@ -1,0 +1,14 @@
+# Monta as duas imagens no Cloud Build (chamado pelo deploy.sh).
+steps:
+  - id: site
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${_IMG}/site:latest", "web"]
+  - id: processador
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "Dockerfile.worker", "-t", "${_IMG}/processador:latest", "."]
+    waitFor: ["-"]
+images:
+  - "${_IMG}/site:latest"
+  - "${_IMG}/processador:latest"
+# Máquina padrão do Cloud Build (entra na cota gratuita de minutos de build).
+timeout: 2400s

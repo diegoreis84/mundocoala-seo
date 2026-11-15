@@ -1,0 +1,10 @@
+# Arquivos que NÃO sobem para o Cloud Build
+.git
+.gitignore
+node_modules/
+web/node_modules/
+web/.next/
+web/data/
+out/
+exemplo/
+*.bundle

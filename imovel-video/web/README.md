@@ -18,10 +18,32 @@ o kit completo: 4 vídeos (Padrão e Ganchos, vertical e horizontal), 5 ganchos,
 
 - **Site (Next.js)**: contas, créditos, compra, envio de links e entrega dos vídeos.
 - **Processador** (`../src/worker.ts`): pega os pedidos da fila, lê o link, escolhe as fotos, cria os ganchos e
-  renderiza os vídeos. Roda na mesma máquina (compartilha o banco SQLite em `web/data/`).
+  renderiza os vídeos. No Google Cloud é um Cloud Run Job disparado a cada pedido; localmente, um processo em loop.
+- **Dados**: Firestore + Cloud Storage no Google Cloud; SQLite + disco local para desenvolvimento (`lib/repo/`).
 - **Créditos**: cada movimento fica registrado (`movimentos`) e é idempotente — um webhook repetido nunca credita duas vezes.
 
-## Rodar
+## Publicar no Google Cloud (recomendado)
+
+Arquitetura: **site** no Cloud Run (escala a zero), **processador** como Cloud Run Job (4 vCPU / 8 GB, liga só
+quando há pedido), **Firestore** (banco), **Cloud Storage** (vídeos, apagados após 90 dias) e chaves no
+**Secret Manager**. Em teste local, cada imóvel levou ~4 min para os 4 vídeos.
+
+1. No console do Google Cloud, selecione o projeto e abra o **Cloud Shell** (ícone `>_`).
+2. Baixe o código e rode o script:
+   ```bash
+   git clone -b claude/real-estate-video-generation-f1z36l https://github.com/diegoreis84/mundocoala-seo.git
+   cd mundocoala-seo/imovel-video
+   ./deploy.sh
+   ```
+3. O script pede a chave da API da Anthropic (obrigatória) e as do Mercado Pago (pode pular e rodar de novo
+   depois). As chaves vão direto para o Secret Manager.
+4. No fim ele mostra a URL do site e a URL do webhook para cadastrar no Mercado Pago.
+
+Para atualizar o site depois de mudanças no código: `git pull && ./deploy.sh`.
+Domínio próprio: aponte o domínio para o Cloud Run (Cloud Run > Gerenciar domínios personalizados, ou
+Cloudflare na frente) e rode `SITE_URL=https://seudominio.com.br ./deploy.sh`.
+
+## Rodar localmente
 
 ```bash
 # na pasta imovel-video/
@@ -29,20 +51,29 @@ npm install
 # na pasta imovel-video/web/
 npm install
 npm run build
-npm start            # site em http://localhost:3000
-npm run worker       # em outro terminal: processador de vídeos
+PAGAMENTO_TESTE=1 npm start   # site em http://localhost:3000 (pagamento simulado)
+npm run worker                # em outro terminal: processador de vídeos
+```
+
+Testes da camada de dados (SQLite e Firestore):
+```bash
+npx tsx web/scripts/testar-repo.ts                                    # SQLite
+gcloud emulators firestore start --host-port=127.0.0.1:8085 &          # Firestore (emulador)
+BANCO=firestore FIRESTORE_EMULATOR_HOST=127.0.0.1:8085 GOOGLE_CLOUD_PROJECT=teste npx tsx web/scripts/testar-repo.ts
 ```
 
 ## Variáveis de ambiente
 
 | Variável | Para quê |
 |---|---|
-| `ANTHROPIC_API_KEY` | **Obrigatória em produção.** Curadoria das fotos, leitura do anúncio e ganchos. Sem ela o resultado é bem pior. |
+| `ANTHROPIC_API_KEY` | **Obrigatória em produção.** Curadoria das fotos, leitura do anúncio e ganchos. |
 | `MP_ACCESS_TOKEN` | Access token do Mercado Pago (Suas integrações > Credenciais de produção). |
 | `MP_WEBHOOK_SECRET` | Assinatura secreta do webhook (Suas integrações > Webhooks). Obrigatória em produção. |
-| `SITE_URL` | URL pública, ex.: `https://videos.seudominio.com.br` (usada no retorno do checkout e no webhook). |
-| `DATA_DIR` | Opcional. Onde ficam banco, fotos e vídeos (padrão `web/data`). |
-| `PAGAMENTO_TESTE=1` | Só para testes locais: simula pagamentos. **Nunca no site público.** |
+| `SITE_URL` | URL pública (usada no retorno do checkout e no webhook). |
+| `BANCO` | `firestore` no Google Cloud; padrão SQLite local (`DATA_DIR`). |
+| `ARMAZENAMENTO`, `BUCKET` | `gcs` + nome do bucket no Google Cloud; padrão disco local (`DATA_DIR`). |
+| `CLOUD_RUN_JOB`, `REGIAO`, `PROJETO_GCP` | Para o site disparar o processador no Google Cloud. |
+| `PAGAMENTO_TESTE=1` | Só para testes: simula pagamentos. **Nunca no site público.** |
 
 ## Mercado Pago — passo a passo
 
@@ -54,10 +85,9 @@ npm run worker       # em outro terminal: processador de vídeos
 4. Para testar antes de cobrar de verdade, use o Access Token de **teste** e os cartões de teste do Mercado Pago.
 5. Pix aparece no checkout quando a conta tem uma chave Pix cadastrada.
 
-## Servidor
+## Servidor próprio (alternativa ao Google Cloud)
 
-O render usa Chrome e bastante CPU: use uma VPS (ex.: 4 vCPU / 8 GB) com Node 22+, não hospedagem "serverless".
-Cada imóvel leva alguns minutos (4 vídeos). Para mais volume: mais processadores e Postgres, ou render no Remotion Lambda.
+Também roda numa VPS (ex.: 4 vCPU / 8 GB, Node 22+) com SQLite e disco local: `npm start` + `npm run worker`.
 O Remotion exige licença paga para empresas com mais de 3 pessoas.
 
 ## Limitações conhecidas
