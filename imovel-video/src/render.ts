@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
 import { gerarTrilha } from "./audio/trilha.js";
-import { FPS, timeline } from "./timeline.js";
+import { FPS, TRANSITION_S, timeline } from "./timeline.js";
 import type { Storyboard } from "./types.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -45,8 +45,11 @@ export async function renderStoryboard(opts: {
   let trilha = opts.trilha ? path.basename(opts.trilha) : undefined;
   if (!trilha && opts.musica !== false) {
     trilha = "trilha.wav";
-    const duracao = timeline(storyboard).total / FPS;
-    await gerarTrilha(path.join(publicDir, trilha), duracao, storyboard.modo === "ganchos" ? "ritmo" : "suave");
+    const tl = timeline(storyboard);
+    const ganchos = storyboard.modo === "ganchos";
+    // Drop no início da 2ª cena (fim do gancho), descontando metade do crossfade.
+    const drop = ganchos && tl.items[1] ? (tl.items[1].start + Math.round((TRANSITION_S * FPS) / 2)) / FPS : 0;
+    await gerarTrilha(path.join(publicDir, trilha), tl.total / FPS, ganchos ? "dinamico" : "suave", drop);
   }
 
   const serveUrl = await bundle({ entryPoint: path.join(ROOT, "remotion/index.ts"), publicDir });

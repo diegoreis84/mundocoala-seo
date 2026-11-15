@@ -3,11 +3,12 @@
  * portanto livre de direitos autorais. Cada vídeo recebe uma trilha com a
  * duração exata, em um de dois estilos:
  *  - "suave": piano elétrico + pad + baixo, 78 BPM (vídeo padrão)
- *  - "ritmo": o mesmo, mais bateria leve, 96 BPM (vídeo com ganchos)
+ *  - "ritmo": o mesmo, mais bateria leve, 96 BPM
+ *  - "dinamico": pop/house de Reels, 120 BPM, com virada ("drop") no fim do gancho (vídeo com ganchos)
  */
 import fs from "node:fs/promises";
 
-export type EstiloTrilha = "suave" | "ritmo";
+export type EstiloTrilha = "suave" | "ritmo" | "dinamico";
 
 const SR = 44100;
 
@@ -270,6 +271,210 @@ export function compor(duracaoS: number, estilo: EstiloTrilha, seed = 7): Bus {
   return { L: outL, R: outR };
 }
 
+/* ---------------- estilo dinâmico (Reels) ---------------- */
+
+/** Pluck sintetizado (dente de serra limitado em banda, harmônicos altos decaem antes = filtro fechando). */
+function pluck(b: Bus, t0: number, dur: number, midi: number, vel: number, pan: number, bright = 1) {
+  const f = midiHz(midi);
+  const n = Math.floor((dur + 0.25) * SR);
+  const start = Math.floor(t0 * SR);
+  const H = Math.min(10, Math.floor(9000 / f));
+  for (let k = 0; k < n; k++) {
+    const t = k / SR;
+    const env = Math.min(1, t / 0.003) * (t < dur ? Math.exp(-t * 5) : Math.exp(-dur * 5) * Math.exp(-(t - dur) * 25));
+    let v = 0;
+    for (let h = 1; h <= H; h++) {
+      v += (Math.sin(2 * Math.PI * f * h * t) + Math.sin(2 * Math.PI * f * 1.006 * h * t)) * (1 / h) * Math.exp(-t * (2 + h * 3.5 / bright));
+    }
+    add(b, start + k, v * env * vel * 0.07, pan);
+  }
+}
+
+/** Baixo sintetizado curto e marcado (contratempo). */
+function synthBass(b: Bus, t0: number, dur: number, midi: number, vel: number) {
+  const f = midiHz(midi);
+  const n = Math.floor((dur + 0.05) * SR);
+  const start = Math.floor(t0 * SR);
+  for (let k = 0; k < n; k++) {
+    const t = k / SR;
+    const env = Math.min(1, t / 0.004) * (t < dur ? 1 - 0.4 * (t / dur) : Math.exp(-(t - dur) * 60));
+    const v = Math.sin(2 * Math.PI * f * t) + 0.45 * Math.sin(2 * Math.PI * 2 * f * t) * Math.exp(-t * 8) + 0.2 * Math.sin(2 * Math.PI * 3 * f * t) * Math.exp(-t * 14);
+    add(b, start + k, v * env * vel * 0.1, 0);
+  }
+}
+
+function kickPunch(b: Bus, t0: number, vel: number) {
+  const n = Math.floor(0.3 * SR);
+  const start = Math.floor(t0 * SR);
+  let ph = 0;
+  for (let k = 0; k < n; k++) {
+    const t = k / SR;
+    const f = 52 + 110 * Math.exp(-t * 35);
+    ph += (2 * Math.PI * f) / SR;
+    const click = t < 0.004 ? (1 - t / 0.004) * 0.5 : 0;
+    add(b, start + k, (Math.sin(ph) * Math.exp(-t * 11) + click) * vel * 0.3, 0);
+  }
+}
+
+function clap(b: Bus, t0: number, vel: number, rand: () => number) {
+  const n = Math.floor(0.25 * SR);
+  const start = Math.floor(t0 * SR);
+  let lp = 0;
+  let prev = 0;
+  for (let k = 0; k < n; k++) {
+    const t = k / SR;
+    const noise = rand() * 2 - 1;
+    lp += 0.45 * (noise - lp);
+    const bp = lp - prev * 0.6; // banda média-alta
+    prev = lp;
+    // três "batidas" rápidas típicas de palma
+    const burst = [0, 0.011, 0.022].reduce((a, d) => a + (t >= d ? Math.exp(-(t - d) * 120) : 0), 0) * 0.5 + Math.exp(-t * 16);
+    add(b, start + k, bp * burst * vel * 0.13, 0.05);
+  }
+}
+
+function openHat(b: Bus, t0: number, vel: number, rand: () => number) {
+  const n = Math.floor(0.16 * SR);
+  const start = Math.floor(t0 * SR);
+  let prev = 0;
+  for (let k = 0; k < n; k++) {
+    const t = k / SR;
+    const noise = rand() * 2 - 1;
+    const hp = noise - prev;
+    prev = noise;
+    add(b, start + k, hp * Math.exp(-t * 22) * vel * 0.045, 0.25);
+  }
+}
+
+/** Subida de ruído antes do drop, e prato no drop. */
+function riser(b: Bus, t0: number, dur: number, rand: () => number) {
+  const n = Math.floor(dur * SR);
+  const start = Math.floor(t0 * SR);
+  let lp = 0;
+  for (let k = 0; k < n; k++) {
+    const p = k / n;
+    const noise = rand() * 2 - 1;
+    lp += (0.02 + 0.6 * p * p) * (noise - lp); // filtro abrindo
+    add(b, start + k, lp * p * p * 0.22, Math.sin(p * 12) * 0.4);
+  }
+}
+function crash(b: Bus, t0: number, rand: () => number) {
+  const n = Math.floor(1.8 * SR);
+  const start = Math.floor(t0 * SR);
+  let prev = 0;
+  for (let k = 0; k < n; k++) {
+    const t = k / SR;
+    const noise = rand() * 2 - 1;
+    const hp = noise - prev;
+    prev = noise;
+    add(b, start + k, hp * Math.exp(-t * 2.8) * 0.07, (rand() - 0.5) * 0.6);
+  }
+}
+
+// vi–IV–I–V em Ré (Bm–G–D–A): progressão pop, energia positiva.
+const PROG_DIN: [number, number[]][] = [
+  [35, [59, 62, 66, 69]], // Bm
+  [31, [59, 62, 67, 71]], // G (add9 no topo)
+  [38, [57, 62, 66, 69]], // D
+  [33, [57, 61, 64, 69]], // A
+];
+
+function comporDinamico(duracaoS: number, dropS: number, seed: number): Bus {
+  const bpm = 120;
+  const beat = 60 / bpm;
+  const bar = beat * 4;
+  const total = Math.ceil((duracaoS + 2) * SR);
+  const music = bus(total); // vai para o reverb e sofre "pumping"
+  const low = bus(total); // baixo (pumping, sem reverb)
+  const drums = bus(total);
+  const fx = bus(total);
+  const rand = rng(seed);
+  const drop = Math.max(0, dropS);
+
+  // Grade de compassos ancorada no drop (o tempo 1 cai exatamente no corte de cena).
+  const firstBar = -Math.ceil(drop / bar);
+  const lastBar = Math.ceil((duracaoS - drop) / bar) + 1;
+  const endFull = duracaoS - 2.5; // últimos segundos: tira bateria para a música "pousar"
+  for (let bi = firstBar; bi < lastBar; bi++) {
+    const t = drop + bi * bar;
+    const [root, notes] = PROG_DIN[((bi % 4) + 4) % 4];
+    const intro = t < drop;
+
+    // Acordes em pluck, ritmo sincopado (1, 1.75 "e", 2.5, 3.5, 4.25).
+    const stabs = [0, 0.75, 1.5, 2.5, 3.25];
+    for (const s of stabs) {
+      const ts = t + s * beat;
+      if (ts < 0) continue;
+      notes.forEach((m, j) => pluck(music, ts, beat * 0.45, m, intro ? 0.55 : 0.85, (j - 1.5) * 0.35, intro ? 0.45 : 1));
+    }
+    // Melodia de arpejo em semicolcheias na oitava de cima (só depois do drop).
+    if (!intro) {
+      const order = [3, 2, 1, 2, 3, 2, 1, 0];
+      for (let s = 0; s < 8; s++) {
+        if ((s === 3 || s === 7) && rand() < 0.5) continue;
+        const ts = t + s * (beat / 2);
+        pluck(music, ts, beat * 0.3, notes[order[s]] + 12, 0.32 + 0.12 * rand(), (rand() - 0.5) * 0.9, 1.4);
+      }
+    }
+
+    for (let q = 0; q < 4; q++) {
+      const tb = t + q * beat;
+      if (tb < 0) continue;
+      if (!intro && tb < endFull) {
+        kickPunch(drums, tb, q === 0 ? 1 : 0.9);
+        synthBass(low, tb + beat / 2, beat * 0.42, root + 12, 1);
+        if (q % 2 === 1) clap(drums, tb, 0.95, rand);
+        openHat(drums, tb + beat / 2, 0.9, rand);
+        for (const sx of [0.25, 0.75]) hat(drums, tb + sx * beat, 0.4 + 0.2 * rand(), rand, -0.25);
+      } else if (intro) {
+        hat(drums, tb + beat / 2, 0.5, rand, 0.2); // pulso leve no gancho
+      }
+    }
+  }
+  if (drop > 0.8) riser(fx, Math.max(0, drop - Math.min(2.4, drop)), Math.min(2.4, drop), rand);
+  if (drop > 0) crash(fx, drop, rand);
+
+  // "Pumping": abaixa acordes e baixo logo após cada bumbo.
+  for (let i = 0; i < total; i++) {
+    const t = i / SR - drop;
+    if (t < 0 || i / SR >= endFull) continue;
+    const ph = ((t % beat) + beat) % beat;
+    const g = 1 - 0.55 * Math.exp(-ph * 14);
+    music.L[i] *= g; music.R[i] *= g; low.L[i] *= g; low.R[i] *= g;
+  }
+
+  const L = new Float32Array(total);
+  const R = new Float32Array(total);
+  const rvL = reverb(music.L, 0.25, 0);
+  const rvR = reverb(music.R, 0.25, 23);
+  for (let i = 0; i < total; i++) {
+    L[i] = rvL[i] + low.L[i] + drums.L[i] + fx.L[i];
+    R[i] = rvR[i] + low.R[i] + drums.R[i] + fx.R[i];
+  }
+  L.set(highpass(highpass(L, 45), 45));
+  R.set(highpass(highpass(R, 45), 45));
+  return finalizar(L, R, duracaoS, 0.15, 0.08);
+}
+
+/** Corta na duração, aplica fades, normaliza (RMS alvo) com limitador suave. */
+function finalizar(L: Float32Array, R: Float32Array, duracaoS: number, alvoRms: number, fadeInS: number): Bus {
+  const n = Math.floor(duracaoS * SR);
+  const outL = L.subarray(0, n);
+  const outR = R.subarray(0, n);
+  let sum = 0;
+  for (let i = 0; i < n; i++) sum += outL[i] * outL[i] + outR[i] * outR[i];
+  const rms = Math.sqrt(sum / (2 * n)) || 1;
+  const gain = alvoRms / rms;
+  const fadeIn = fadeInS * SR;
+  const fadeOut = 2.5 * SR;
+  for (let i = 0; i < n; i++) {
+    const f = Math.min(1, i / fadeIn, (n - i) / fadeOut);
+    outL[i] = Math.tanh(outL[i] * gain * 1.2) * f * 0.89;
+    outR[i] = Math.tanh(outR[i] * gain * 1.2) * f * 0.89;
+  }
+  return { L: outL, R: outR };
+}
+
 /** Grava WAV estéreo 16 bits. */
 export async function gravarWav(arquivo: string, audio: Bus) {
   const n = audio.L.length;
@@ -294,6 +499,11 @@ export async function gravarWav(arquivo: string, audio: Bus) {
   await fs.writeFile(arquivo, buf);
 }
 
-export async function gerarTrilha(arquivo: string, duracaoS: number, estilo: EstiloTrilha) {
-  await gravarWav(arquivo, compor(duracaoS, estilo));
+/**
+ * @param dropS instante (s) da virada no estilo dinâmico — normalmente o fim do gancho,
+ *              para a música "explodir" junto com o primeiro corte de cena.
+ */
+export async function gerarTrilha(arquivo: string, duracaoS: number, estilo: EstiloTrilha, dropS = 3) {
+  const audio = estilo === "dinamico" ? comporDinamico(duracaoS, dropS, 11) : compor(duracaoS, estilo);
+  await gravarWav(arquivo, audio);
 }

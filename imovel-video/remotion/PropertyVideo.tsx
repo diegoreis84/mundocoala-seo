@@ -36,6 +36,8 @@ const OpeningText: React.FC<{ sb: Storyboard }> = ({ sb }) => {
 export const PropertyVideo: React.FC<PropertyVideoProps> = ({ storyboard: sb, trilha }) => {
   const { items, outro, total } = timeline(sb);
   const ganchos = sb.modo === "ganchos";
+  // Sem narração: no ganchos a música é protagonista; no padrão, mais discreta.
+  const musicVol = ganchos ? 0.8 : 0.55;
   const u = useUnit();
   const vertical = useVertical();
   const last = sb.cenas[sb.cenas.length - 1];
@@ -77,7 +79,7 @@ export const PropertyVideo: React.FC<PropertyVideoProps> = ({ storyboard: sb, tr
         <Audio
           src={staticFile(trilha)}
           volume={(f) =>
-            interpolate(f, [0, FPS * 0.5, total - FPS * 1.5, total], [0, 0.55, 0.55, 0], {
+            interpolate(f, [0, FPS * 0.2, total - FPS * 1.5, total], [0, musicVol, musicVol, 0], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             })
