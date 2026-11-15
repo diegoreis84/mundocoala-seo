@@ -1,0 +1,121 @@
+{
+  "versao": 1,
+  "imovel": {
+    "titulo": "Apartamento com vista para o parque",
+    "tipo": "Apartamento",
+    "finalidade": "venda",
+    "preco": 1490000,
+    "condominio": 1850,
+    "iptu": 420,
+    "area_m2": 128,
+    "quartos": 3,
+    "suites": 2,
+    "banheiros": 3,
+    "vagas": 2,
+    "bairro": "Vila Mariana",
+    "cidade": null,
+    "diferenciais": [],
+    "frases_por_ambiente": []
+  },
+  "marca": {
+    "nome": "Casa Nobre Imóveis",
+    "creci": "12345-J",
+    "contato": "(11) 99999-0000",
+    "cor": "#C8A46A"
+  },
+  "destaques": [
+    "128 m²",
+    "3 quartos",
+    "2 suítes",
+    "2 vagas"
+  ],
+  "cenas": [
+    {
+      "foto": "01-fachada.jpg",
+      "ambiente": "fachada",
+      "titulo": "Apartamento com vista para o parque",
+      "subtitulo": "Vila Mariana",
+      "movimento": "zoom_in",
+      "duracao_s": 3.5
+    },
+    {
+      "foto": "12-sala-dup.jpg",
+      "ambiente": "sala",
+      "titulo": "Sala",
+      "subtitulo": "128 m² privativos",
+      "movimento": "pan_direita",
+      "duracao_s": 3
+    },
+    {
+      "foto": "04-varanda-gourmet.jpg",
+      "ambiente": "varanda",
+      "titulo": "Varanda",
+      "movimento": "zoom_out",
+      "duracao_s": 3
+    },
+    {
+      "foto": "05-cozinha.jpg",
+      "ambiente": "cozinha",
+      "titulo": "Cozinha",
+      "movimento": "pan_esquerda",
+      "duracao_s": 3
+    },
+    {
+      "foto": "06-suite-master.jpg",
+      "ambiente": "suite",
+      "titulo": "Suíte",
+      "subtitulo": "2 suítes",
+      "movimento": "zoom_in",
+      "duracao_s": 3
+    },
+    {
+      "foto": "07-quarto.jpg",
+      "ambiente": "quarto",
+      "titulo": "Quarto",
+      "subtitulo": "3 quartos",
+      "movimento": "pan_direita",
+      "duracao_s": 3
+    },
+    {
+      "foto": "08-banheiro-suite.jpg",
+      "ambiente": "banheiro",
+      "titulo": "Banheiro",
+      "subtitulo": "3 banheiros",
+      "movimento": "zoom_out",
+      "duracao_s": 3
+    },
+    {
+      "foto": "09-piscina.jpg",
+      "ambiente": "piscina",
+      "titulo": "Piscina",
+      "movimento": "pan_esquerda",
+      "duracao_s": 3
+    }
+  ],
+  "descartadas": [
+    {
+      "foto": "02-sala.jpg",
+      "motivo": "parecida com 12-sala-dup.jpg"
+    },
+    {
+      "foto": "13-quarto-borrado.jpg",
+      "motivo": "parecida com 07-quarto.jpg"
+    },
+    {
+      "foto": "11-planta.jpg",
+      "motivo": "nota baixa (2.6: exposição ruim)"
+    },
+    {
+      "foto": "14-cozinha-escura.jpg",
+      "motivo": "nota baixa (-1.28: borrada, exposição ruim)"
+    },
+    {
+      "foto": "10-academia-lazer.jpg",
+      "motivo": "fora do limite de cenas"
+    },
+    {
+      "foto": "03-sala-2.jpg",
+      "motivo": "fora do limite de cenas"
+    }
+  ]
+}

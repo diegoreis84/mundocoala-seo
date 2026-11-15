@@ -1,0 +1,31 @@
+{
+  "name": "imovel-video",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gera vídeos de imóveis a partir das fotos e do texto do anúncio.",
+  "scripts": {
+    "gerar": "tsx src/cli.ts",
+    "studio": "remotion studio remotion/index.ts --public-dir=out/fotos/public",
+    "typecheck": "tsc --noEmit",
+    "exemplo:fotos": "tsx scripts/gerar-fotos-exemplo.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@remotion/bundler": "^4.0.543",
+    "@remotion/cli": "^4.0.543",
+    "@remotion/fonts": "^4.0.543",
+    "@remotion/renderer": "^4.0.543",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.543",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.31",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
