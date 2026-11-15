@@ -20,7 +20,9 @@ Opções:
   --modos <lista>        padrao,ganchos (padrão: ambos)
   --formatos <lista>     vertical,horizontal (padrão: ambos)
   --max-cenas <n>        Máximo de fotos no vídeo padrão (padrão: 8)
-  --trilha <arquivo>     Música (arquivo dentro da pasta de fotos)
+  --trilha <arquivo>     Música própria (arquivo dentro da pasta de fotos). Sem ela, a trilha
+                         é composta automaticamente (livre de direitos autorais)
+  --sem-musica           Vídeo sem música
   --so-roteiro           Só gera roteiros e kit para revisão, sem renderizar
   --sem-ia               Força o modo sem IA (heurísticas e modelos de gancho)
   --dados <json>         Dados do anúncio já extraídos/revisados (pula a IA nessa etapa)
@@ -46,6 +48,7 @@ async function main() {
       formatos: { type: "string", default: "vertical,horizontal" },
       "max-cenas": { type: "string", default: "8" },
       trilha: { type: "string" },
+      "sem-musica": { type: "boolean", default: false },
       roteiro: { type: "string" },
       "so-roteiro": { type: "boolean", default: false },
       "sem-ia": { type: "boolean", default: false },
@@ -119,6 +122,7 @@ async function main() {
         formatos,
         nome: sb.modo,
         trilha: values.trilha,
+        musica: !values["sem-musica"],
         onProgress: (f, p) => {
           const pct = Math.floor(p * 4) * 25;
           if (pct !== last) console.log(`  ${f}: ${(last = pct)}%`);

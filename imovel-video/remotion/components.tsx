@@ -177,19 +177,36 @@ export const Highlights: React.FC<{ items: string[] }> = ({ items }) => {
   );
 };
 
-/** Marca discreta no topo. */
-export const BrandTag: React.FC<{ brand: Brand }> = ({ brand }) => {
+/**
+ * Marca da imobiliária: logo pequeno no canto superior direito
+ * (ou o nome, em texto, quando não há logo). Abaixo da barra de progresso no modo ganchos.
+ */
+export const BrandTag: React.FC<{ brand: Brand; belowBar?: boolean }> = ({ brand, belowBar }) => {
   const u = useUnit();
   const vertical = useVertical();
+  const side = (vertical ? 60 : 80) * u;
+  const top = (vertical ? (belowBar ? 105 : 80) : belowBar ? 60 : 50) * u;
+  if (brand.logo) {
+    return (
+      <Img
+        src={staticFile(brand.logo)}
+        style={{
+          position: "absolute",
+          top,
+          right: side,
+          height: (vertical ? 62 : 56) * u,
+          borderRadius: 4 * u,
+          boxShadow: "0 2px 14px rgba(0,0,0,0.25)",
+        }}
+      />
+    );
+  }
   return (
     <div
       style={{
         position: "absolute",
-        top: (vertical ? 120 : 64) * u,
-        left: (vertical ? 80 : 110) * u,
-        display: "flex",
-        alignItems: "center",
-        gap: 14 * u,
+        top,
+        right: side,
         color: "white",
         fontFamily: sans,
         fontWeight: 600,
@@ -199,7 +216,6 @@ export const BrandTag: React.FC<{ brand: Brand }> = ({ brand }) => {
         textShadow: "0 1px 12px rgba(0,0,0,0.4)",
       }}
     >
-      {brand.logo ? <Img src={staticFile(brand.logo)} style={{ height: 44 * u }} /> : null}
       {brand.nome}
     </div>
   );

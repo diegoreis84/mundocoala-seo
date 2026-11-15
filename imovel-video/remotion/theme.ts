@@ -19,6 +19,4 @@ for (const [family, weight] of FONTS) {
   loadFont({ family, weight, url: staticFile(`fonts/${family.replace(/ /g, "")}-${weight}.ttf`) });
 }
 
-export const FPS = 30;
-export const TRANSITION_S = 0.6;
-export const OUTRO_S = 4.5;
+export { FPS, OUTRO_S, TRANSITION_S } from "../src/timeline";

@@ -4,3 +4,4 @@ exemplo/fotos/
 .env
 exemplo/*/foto-*.jpg
 exemplo/*/urls.txt
+exemplo/*/logo.png

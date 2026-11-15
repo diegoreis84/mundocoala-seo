@@ -3,24 +3,14 @@ import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame
 import type { Storyboard } from "../src/types";
 import { BrandTag, CameraPhoto, Caption, Highlights, Outro, Scrim, useUnit, useVertical } from "./components";
 import { HookText, ProgressBar } from "./HookScene";
-import { FPS, OUTRO_S, TRANSITION_S } from "./theme";
+import { timeline } from "../src/timeline";
+import { FPS, TRANSITION_S } from "./theme";
+
+export { timeline };
 
 export type PropertyVideoProps = { storyboard: Storyboard; trilha?: string };
 
 const TRANSITION = Math.round(TRANSITION_S * FPS);
-
-/** Calcula início/duração de cada cena com sobreposição para o crossfade. */
-export function timeline(sb: Storyboard) {
-  let start = 0;
-  const items = sb.cenas.map((c) => {
-    const dur = Math.round(c.duracao_s * FPS) + TRANSITION;
-    const item = { start, dur };
-    start += dur - TRANSITION;
-    return item;
-  });
-  const outro = { start, dur: Math.round(OUTRO_S * FPS) + TRANSITION };
-  return { items, outro, total: outro.start + outro.dur };
-}
 
 const FadeIn: React.FC<{ children: React.ReactNode; first: boolean }> = ({ children, first }) => {
   const frame = useCurrentFrame();
@@ -71,7 +61,7 @@ export const PropertyVideo: React.FC<PropertyVideoProps> = ({ storyboard: sb, tr
                 {i === 0 && !ganchos ? <OpeningText sb={sb} /> : null}
               </>
             )}
-            {ganchos ? null : <BrandTag brand={sb.marca} />}
+            <BrandTag brand={sb.marca} belowBar={ganchos} />
           </FadeIn>
         </Sequence>
       ))}
@@ -83,7 +73,17 @@ export const PropertyVideo: React.FC<PropertyVideoProps> = ({ storyboard: sb, tr
         </Sequence>
       ) : null}
       {ganchos ? <ProgressBar total={total} brand={sb.marca} /> : null}
-      {trilha ? <Audio src={staticFile(trilha)} volume={(f) => interpolate(f, [outro.start + outro.dur - FPS, outro.start + outro.dur], [0.6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })} /> : null}
+      {trilha ? (
+        <Audio
+          src={staticFile(trilha)}
+          volume={(f) =>
+            interpolate(f, [0, FPS * 0.5, total - FPS * 1.5, total], [0, 0.55, 0.55, 0], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
+          }
+        />
+      ) : null}
     </AbsoluteFill>
   );
 };
