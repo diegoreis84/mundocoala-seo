@@ -145,6 +145,13 @@ export const firestoreRepo: Repo = {
     });
   },
 
+  async ajustarCreditos(usuarioId, delta, motivo, ref) {
+    return fs().runTransaction(async (t) => {
+      const l = await lerParaLancamento(t, usuarioId, motivo, ref);
+      return escreverLancamento(t, l, usuarioId, delta, motivo, ref);
+    });
+  },
+
   async criarVideoComCredito(usuarioId, url) {
     const id = randomUUID();
     const ok = await fs().runTransaction(async (t) => {

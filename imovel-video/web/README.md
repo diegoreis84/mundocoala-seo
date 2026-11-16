@@ -75,6 +75,15 @@ BANCO=firestore FIRESTORE_EMULATOR_HOST=127.0.0.1:8085 GOOGLE_CLOUD_PROJECT=test
 | `JOB_PROCESSADOR`, `REGIAO`, `PROJETO_GCP` | Para o site disparar o processador no Google Cloud. |
 | `PAGAMENTO_TESTE=1` | Só para testes: simula pagamentos. **Nunca no site público.** |
 
+## Créditos de cortesia (testes e brindes)
+
+No Cloud Shell, na pasta `imovel-video/web`:
+```bash
+npm ci --omit=dev
+BANCO=firestore GOOGLE_CLOUD_PROJECT=projeto-app-videos-imob npx -y tsx scripts/creditos.ts email@do-cliente.com 3
+```
+Número negativo retira créditos. Cada lançamento fica registrado em `movimentos` (motivo "cortesia").
+
 ## Mercado Pago — passo a passo
 
 1. Crie a conta (CPF ou CNPJ) e uma aplicação em https://www.mercadopago.com.br/developers/panel/app

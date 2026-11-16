@@ -137,6 +137,10 @@ export const sqliteRepo: Repo = {
     });
   },
 
+  async ajustarCreditos(usuarioId, delta, motivo, ref) {
+    return tx((d) => lancar(d, usuarioId, delta, motivo, ref));
+  },
+
   async criarVideoComCredito(usuarioId, url) {
     try {
       return tx((d) => {

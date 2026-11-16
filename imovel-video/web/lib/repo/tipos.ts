@@ -58,6 +58,9 @@ export interface Repo {
   /** Marca pago e credita, de forma atômica e idempotente. Confere o valor. */
   confirmarPagamento(pedidoId: string, pagamentoId: string, valorPagoCentavos: number): Promise<boolean>;
 
+  /** Lança créditos manualmente (cortesia, ajuste). Idempotente por (motivo, ref). */
+  ajustarCreditos(usuarioId: string, delta: number, motivo: string, ref: string): Promise<boolean>;
+
   /** Gasta 1 crédito e põe o vídeo na fila, atomicamente. */
   criarVideoComCredito(usuarioId: string, url: string): Promise<{ ok: true; id: string } | { ok: false }>;
   videoDoUsuario(id: string, usuarioId: string): Promise<Video | null>;

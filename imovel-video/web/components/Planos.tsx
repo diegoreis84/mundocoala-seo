@@ -3,7 +3,7 @@ import { comprar } from "@/app/actions";
 import { PLANOS, PRECO_CHEIO, brl, precoPlano, precoPorVideo } from "@/lib/planos";
 
 /** Cartões de preço. Com `comprar`, cada cartão vira um botão de compra; senão, leva ao cadastro. */
-export function Planos({ podeComprar }: { podeComprar: boolean }) {
+export function Planos({ podeComprar, desativado = false }: { podeComprar: boolean; desativado?: boolean }) {
   return (
     <div className="grid grid-4">
       {PLANOS.map((p) => (
@@ -25,8 +25,8 @@ export function Planos({ podeComprar }: { podeComprar: boolean }) {
           {podeComprar ? (
             <form action={comprar}>
               <input type="hidden" name="plano" value={p.id} />
-              <button className={`btn block${p.destaque ? "" : " secondary"}`} type="submit">
-                Comprar
+              <button className={`btn block${p.destaque ? "" : " secondary"}`} type="submit" disabled={desativado}>
+                {desativado ? "Em breve" : "Comprar"}
               </button>
             </form>
           ) : (

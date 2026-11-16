@@ -7,7 +7,7 @@ import { salvarBuffer } from "@/lib/armazenamento";
 import { conferirSenha, criarSessao, encerrarSessao, exigirUsuario, hashSenha } from "@/lib/auth";
 import { dispararProcessador } from "@/lib/processador";
 import { EmailEmUso, getRepo } from "@/lib/repo";
-import { criarCheckout, modoTeste } from "@/lib/mercadopago";
+import { criarCheckout, modoTeste, pagamentosAtivos } from "@/lib/mercadopago";
 import { planoPorId, precoPlano } from "@/lib/planos";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -50,6 +50,7 @@ export async function sair() {
 
 export async function comprar(f: FormData) {
   const u = await exigirUsuario();
+  if (!pagamentosAtivos()) redirect("/comprar");
   const plano = planoPorId(str(f, "plano"));
   if (!plano) comErro("/comprar", "Pacote inválido.");
   const valor = precoPlano(plano!);

@@ -17,6 +17,9 @@ const API = "https://api.mercadopago.com";
 
 export const modoTeste = () =>
   process.env.PAGAMENTO_TESTE === "1" || (!process.env.MP_ACCESS_TOKEN && process.env.NODE_ENV !== "production");
+/** Há como cobrar? (Mercado Pago configurado ou modo teste.) */
+export const pagamentosAtivos = () => modoTeste() || Boolean(process.env.MP_ACCESS_TOKEN);
+
 export const siteUrl = () => (process.env.SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 function token() {
