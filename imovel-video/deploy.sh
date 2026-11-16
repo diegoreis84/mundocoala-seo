@@ -98,7 +98,7 @@ gcloud run jobs deploy processador --image="$IMG/processador:latest" --region="$
   --set-secrets="ANTHROPIC_API_KEY=anthropic-api-key:latest" --quiet
 
 SEGREDOS_SITE=""
-ENV_SITE="BANCO=firestore,ARMAZENAMENTO=gcs,BUCKET=$BUCKET,CLOUD_RUN_JOB=processador,REGIAO=$REGIAO,PROJETO_GCP=$PROJETO"
+ENV_SITE="BANCO=firestore,ARMAZENAMENTO=gcs,BUCKET=$BUCKET,JOB_PROCESSADOR=processador,REGIAO=$REGIAO,PROJETO_GCP=$PROJETO"
 if [[ "$MP_OK" == "1" ]] || gcloud secrets describe mp-access-token >/dev/null 2>&1; then
   SEGREDOS_SITE="MP_ACCESS_TOKEN=mp-access-token:latest"
   gcloud secrets describe mp-webhook-secret >/dev/null 2>&1 && SEGREDOS_SITE="$SEGREDOS_SITE,MP_WEBHOOK_SECRET=mp-webhook-secret:latest"

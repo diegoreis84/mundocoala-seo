@@ -72,7 +72,7 @@ BANCO=firestore FIRESTORE_EMULATOR_HOST=127.0.0.1:8085 GOOGLE_CLOUD_PROJECT=test
 | `SITE_URL` | URL pública (usada no retorno do checkout e no webhook). |
 | `BANCO` | `firestore` no Google Cloud; padrão SQLite local (`DATA_DIR`). |
 | `ARMAZENAMENTO`, `BUCKET` | `gcs` + nome do bucket no Google Cloud; padrão disco local (`DATA_DIR`). |
-| `CLOUD_RUN_JOB`, `REGIAO`, `PROJETO_GCP` | Para o site disparar o processador no Google Cloud. |
+| `JOB_PROCESSADOR`, `REGIAO`, `PROJETO_GCP` | Para o site disparar o processador no Google Cloud. |
 | `PAGAMENTO_TESTE=1` | Só para testes: simula pagamentos. **Nunca no site público.** |
 
 ## Mercado Pago — passo a passo
